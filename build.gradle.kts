@@ -28,8 +28,8 @@ repositories {
 
 dependencies {
     // Core dependencies
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    compileOnly("org.slf4j:slf4j-api:$slf4jVersion")
+    compileOnly("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("com.google.guava:guava:$guavaVersion")
 
     // Optional messaging dependencies (marked as compileOnly)

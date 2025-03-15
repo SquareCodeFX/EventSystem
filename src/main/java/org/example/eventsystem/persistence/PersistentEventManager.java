@@ -1,8 +1,8 @@
 package org.example.eventsystem.persistence;
 
 import org.example.eventsystem.event.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +62,7 @@ public class PersistentEventManager {
         });
         this.running = new AtomicBoolean(false);
         this.autoSaveIntervalSeconds = autoSaveIntervalSeconds;
-        
+
         // Create the storage directory if it doesn't exist
         try {
             Files.createDirectories(Paths.get(baseStorageDir));
@@ -84,7 +84,7 @@ public class PersistentEventManager {
     public void start() {
         if (running.compareAndSet(false, true)) {
             logger.info("Starting PersistentEventManager with auto-save interval of {} seconds", autoSaveIntervalSeconds);
-            
+
             // Schedule periodic saving of events
             if (autoSaveIntervalSeconds > 0) {
                 scheduledExecutor.scheduleAtFixedRate(this::saveAllEvents, 
@@ -99,10 +99,10 @@ public class PersistentEventManager {
     public void stop() {
         if (running.compareAndSet(true, false)) {
             logger.info("Stopping PersistentEventManager");
-            
+
             // Save all events before shutting down
             saveAllEvents();
-            
+
             // Shutdown the scheduler
             scheduledExecutor.shutdown();
             try {
@@ -126,11 +126,11 @@ public class PersistentEventManager {
         if (event == null) {
             return;
         }
-        
+
         Class<? extends Event> eventType = event.getClass();
         List<Event> events = eventStore.computeIfAbsent(eventType, k -> Collections.synchronizedList(new ArrayList<>()));
         events.add(event);
-        
+
         logger.debug("Stored event {} for persistence", event);
     }
 
@@ -145,16 +145,16 @@ public class PersistentEventManager {
         if (events == null || events.isEmpty()) {
             return 0;
         }
-        
+
         String dirPath = getStoragePathForType(eventType);
         String fileName = eventType.getSimpleName() + "_" + 
                 Instant.now().toString().replace(':', '-') + ".events";
         Path filePath = Paths.get(dirPath, fileName);
-        
+
         try {
             // Create the directory if it doesn't exist
             Files.createDirectories(Paths.get(dirPath));
-            
+
             // Synchronize on the events list to prevent concurrent modification
             synchronized (events) {
                 try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath.toFile()))) {
@@ -176,11 +176,11 @@ public class PersistentEventManager {
      */
     public int saveAllEvents() {
         int totalSaved = 0;
-        
+
         for (Class<? extends Event> eventType : eventStore.keySet()) {
             totalSaved += saveEvents(eventType);
         }
-        
+
         return totalSaved;
     }
 
@@ -195,14 +195,14 @@ public class PersistentEventManager {
     public <T extends Event> List<T> loadEvents(Class<T> eventType) {
         String dirPath = getStoragePathForType(eventType);
         Path dir = Paths.get(dirPath);
-        
+
         if (!Files.exists(dir)) {
             logger.info("No storage directory found for event type {}", eventType.getName());
             return Collections.emptyList();
         }
-        
+
         List<T> loadedEvents = new ArrayList<>();
-        
+
         try {
             // Find all event files for this type
             List<File> eventFiles = Files.list(dir)
@@ -210,7 +210,7 @@ public class PersistentEventManager {
                     .filter(path -> path.getFileName().toString().startsWith(eventType.getSimpleName()))
                     .map(Path::toFile)
                     .collect(Collectors.toList());
-            
+
             // Load events from each file
             for (File file : eventFiles) {
                 try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
@@ -224,7 +224,7 @@ public class PersistentEventManager {
         } catch (IOException e) {
             logger.error("Failed to list event files for type {}", eventType.getName(), e);
         }
-        
+
         return loadedEvents;
     }
 
@@ -247,11 +247,11 @@ public class PersistentEventManager {
      */
     public int clearAllEvents() {
         int totalCleared = 0;
-        
+
         for (List<Event> events : eventStore.values()) {
             totalCleared += events.size();
         }
-        
+
         eventStore.clear();
         return totalCleared;
     }

@@ -2,8 +2,8 @@ package org.example.eventsystem.distributed;
 
 import org.example.eventsystem.bus.EventBus;
 import org.example.eventsystem.event.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory.Logger;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,15 +48,15 @@ public class DistributedEventManager {
             logger.warn("Message broker adapter with name '{}' already exists", name);
             return false;
         }
-        
+
         brokerAdapters.put(name, adapter);
         logger.info("Registered message broker adapter: {}", name);
-        
+
         // If already running, start the adapter
         if (running.get()) {
             adapter.start();
         }
-        
+
         return true;
     }
 
@@ -68,17 +68,17 @@ public class DistributedEventManager {
      */
     public boolean unregisterBrokerAdapter(String name) {
         MessageBrokerAdapter adapter = brokerAdapters.remove(name);
-        
+
         if (adapter != null) {
             // Stop the adapter if it's running
             if (running.get()) {
                 adapter.stop();
             }
-            
+
             logger.info("Unregistered message broker adapter: {}", name);
             return true;
         }
-        
+
         return false;
     }
 
@@ -88,7 +88,7 @@ public class DistributedEventManager {
     public void start() {
         if (running.compareAndSet(false, true)) {
             logger.info("Starting DistributedEventManager");
-            
+
             // Start all registered adapters
             for (Map.Entry<String, MessageBrokerAdapter> entry : brokerAdapters.entrySet()) {
                 try {
@@ -107,7 +107,7 @@ public class DistributedEventManager {
     public void stop() {
         if (running.compareAndSet(true, false)) {
             logger.info("Stopping DistributedEventManager");
-            
+
             // Stop all registered adapters
             for (Map.Entry<String, MessageBrokerAdapter> entry : brokerAdapters.entrySet()) {
                 try {
@@ -133,13 +133,13 @@ public class DistributedEventManager {
             logger.warn("Cannot publish event: DistributedEventManager is not running");
             return false;
         }
-        
+
         MessageBrokerAdapter adapter = brokerAdapters.get(brokerName);
         if (adapter == null) {
             logger.warn("Cannot publish event: no message broker adapter found with name '{}'", brokerName);
             return false;
         }
-        
+
         try {
             adapter.publishEvent(event);
             logger.debug("Published event {} to remote broker {}", event, brokerName);
@@ -162,9 +162,9 @@ public class DistributedEventManager {
             logger.warn("Cannot publish event: DistributedEventManager is not running");
             return 0;
         }
-        
+
         int successCount = 0;
-        
+
         for (Map.Entry<String, MessageBrokerAdapter> entry : brokerAdapters.entrySet()) {
             try {
                 entry.getValue().publishEvent(event);
@@ -174,7 +174,7 @@ public class DistributedEventManager {
                 logger.error("Failed to publish event to remote broker {}", entry.getKey(), e);
             }
         }
-        
+
         return successCount;
     }
 

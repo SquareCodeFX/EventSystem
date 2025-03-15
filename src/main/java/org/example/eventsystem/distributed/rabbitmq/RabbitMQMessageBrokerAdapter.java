@@ -3,8 +3,8 @@ package org.example.eventsystem.distributed.rabbitmq;
 import org.example.eventsystem.bus.EventBus;
 import org.example.eventsystem.distributed.MessageBrokerAdapter;
 import org.example.eventsystem.event.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory.Logger;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -104,7 +104,7 @@ public class RabbitMQMessageBrokerAdapter implements MessageBrokerAdapter {
     public void start() {
         if (running.compareAndSet(false, true)) {
             logger.info("Starting RabbitMQ message broker adapter for exchange: {}, queue: {}", exchange, queue);
-            
+
             try {
                 // In a real implementation, you would create actual RabbitMQ connection and channel objects here
                 // For example:
@@ -118,13 +118,13 @@ public class RabbitMQMessageBrokerAdapter implements MessageBrokerAdapter {
                 // channel.exchangeDeclare(exchange, "topic", true);
                 // channel.queueDeclare(queue, true, false, false, null);
                 // channel.queueBind(queue, exchange, routingKey);
-                
+
                 // For this example, we'll just simulate the connection
                 connected.set(true);
-                
+
                 // Start the consumer thread
                 executorService.submit(this::consumeEvents);
-                
+
                 logger.info("RabbitMQ message broker adapter started successfully");
             } catch (Exception e) {
                 running.set(false);
@@ -137,19 +137,19 @@ public class RabbitMQMessageBrokerAdapter implements MessageBrokerAdapter {
     public void stop() {
         if (running.compareAndSet(true, false)) {
             logger.info("Stopping RabbitMQ message broker adapter");
-            
+
             try {
                 // In a real implementation, you would close the RabbitMQ channel and connection here
                 // For example:
                 // channel.close();
                 // connection.close();
-                
+
                 // For this example, we'll just simulate the disconnection
                 connected.set(false);
-                
+
                 // Shutdown the consumer thread
                 executorService.shutdown();
-                
+
                 logger.info("RabbitMQ message broker adapter stopped successfully");
             } catch (Exception e) {
                 logger.error("Failed to stop RabbitMQ message broker adapter", e);
@@ -162,17 +162,17 @@ public class RabbitMQMessageBrokerAdapter implements MessageBrokerAdapter {
         if (!running.get()) {
             throw new IllegalStateException("RabbitMQ message broker adapter is not running");
         }
-        
+
         if (!connected.get()) {
             throw new IllegalStateException("Not connected to RabbitMQ");
         }
-        
+
         try {
             // In a real implementation, you would serialize the event and send it to RabbitMQ
             // For example:
             // byte[] serializedEvent = serializeEvent(event);
             // channel.basicPublish(exchange, event.getClass().getName(), null, serializedEvent);
-            
+
             // For this example, we'll just log the event
             logger.debug("Published event {} to RabbitMQ exchange {}", event, exchange);
         } catch (Exception e) {
@@ -196,7 +196,7 @@ public class RabbitMQMessageBrokerAdapter implements MessageBrokerAdapter {
      */
     private void consumeEvents() {
         logger.info("Starting to consume events from RabbitMQ queue: {}", queue);
-        
+
         while (running.get()) {
             try {
                 // In a real implementation, you would consume messages from RabbitMQ and process them
@@ -205,7 +205,7 @@ public class RabbitMQMessageBrokerAdapter implements MessageBrokerAdapter {
                 //     Event event = deserializeEvent(delivery.getBody());
                 //     localEventBus.publish(event);
                 // }, consumerTag -> {});
-                
+
                 // For this example, we'll just sleep to simulate consuming
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -214,12 +214,12 @@ public class RabbitMQMessageBrokerAdapter implements MessageBrokerAdapter {
                 break;
             } catch (Exception e) {
                 logger.error("Error consuming events from RabbitMQ", e);
-                
+
                 // In a real implementation, you might want to implement a retry mechanism
                 // or reconnect logic here
             }
         }
-        
+
         logger.info("Stopped consuming events from RabbitMQ queue: {}", queue);
     }
 

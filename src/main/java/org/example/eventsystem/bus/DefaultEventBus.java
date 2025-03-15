@@ -2,8 +2,8 @@ package org.example.eventsystem.bus;
 
 import org.example.eventsystem.event.Event;
 import org.example.eventsystem.listener.EventListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;

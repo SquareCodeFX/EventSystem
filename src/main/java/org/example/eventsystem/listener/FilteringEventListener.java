@@ -2,8 +2,8 @@ package org.example.eventsystem.listener;
 
 import org.example.eventsystem.event.Event;
 import org.example.eventsystem.event.EventPriority;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory.Logger;
 
 /**
  * An event listener that can modify or filter events before they are passed on to other listeners.
@@ -46,7 +46,7 @@ public abstract class FilteringEventListener<T extends Event> extends AbstractEv
         try {
             // Apply the filter
             boolean shouldContinue = filterEvent(event);
-            
+
             // If the filter returns false, cancel the event if possible
             if (!shouldContinue && event.isCancellable() && !event.isCancelled()) {
                 event.cancel();

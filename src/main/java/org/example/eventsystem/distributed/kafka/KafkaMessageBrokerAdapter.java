@@ -3,8 +3,8 @@ package org.example.eventsystem.distributed.kafka;
 import org.example.eventsystem.bus.EventBus;
 import org.example.eventsystem.distributed.MessageBrokerAdapter;
 import org.example.eventsystem.event.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory.Logger;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -78,20 +78,20 @@ public class KafkaMessageBrokerAdapter implements MessageBrokerAdapter {
     public void start() {
         if (running.compareAndSet(false, true)) {
             logger.info("Starting Kafka message broker adapter for topic: {}", topic);
-            
+
             try {
                 // In a real implementation, you would create actual Kafka producer and consumer objects here
                 // For example:
                 // producer = new KafkaProducer<>(kafkaProperties);
                 // consumer = new KafkaConsumer<>(kafkaProperties);
                 // consumer.subscribe(Collections.singletonList(topic));
-                
+
                 // For this example, we'll just simulate the connection
                 connected.set(true);
-                
+
                 // Start the consumer thread
                 executorService.submit(this::consumeEvents);
-                
+
                 logger.info("Kafka message broker adapter started successfully");
             } catch (Exception e) {
                 running.set(false);
@@ -104,19 +104,19 @@ public class KafkaMessageBrokerAdapter implements MessageBrokerAdapter {
     public void stop() {
         if (running.compareAndSet(true, false)) {
             logger.info("Stopping Kafka message broker adapter");
-            
+
             try {
                 // In a real implementation, you would close the Kafka producer and consumer here
                 // For example:
                 // producer.close();
                 // consumer.close();
-                
+
                 // For this example, we'll just simulate the disconnection
                 connected.set(false);
-                
+
                 // Shutdown the consumer thread
                 executorService.shutdown();
-                
+
                 logger.info("Kafka message broker adapter stopped successfully");
             } catch (Exception e) {
                 logger.error("Failed to stop Kafka message broker adapter", e);
@@ -129,18 +129,18 @@ public class KafkaMessageBrokerAdapter implements MessageBrokerAdapter {
         if (!running.get()) {
             throw new IllegalStateException("Kafka message broker adapter is not running");
         }
-        
+
         if (!connected.get()) {
             throw new IllegalStateException("Not connected to Kafka");
         }
-        
+
         try {
             // In a real implementation, you would serialize the event and send it to Kafka
             // For example:
             // byte[] serializedEvent = serializeEvent(event);
             // ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic, event.getId().toString(), serializedEvent);
             // producer.send(record);
-            
+
             // For this example, we'll just log the event
             logger.debug("Published event {} to Kafka topic {}", event, topic);
         } catch (Exception e) {
@@ -164,7 +164,7 @@ public class KafkaMessageBrokerAdapter implements MessageBrokerAdapter {
      */
     private void consumeEvents() {
         logger.info("Starting to consume events from Kafka topic: {}", topic);
-        
+
         while (running.get()) {
             try {
                 // In a real implementation, you would poll for records from Kafka and process them
@@ -174,7 +174,7 @@ public class KafkaMessageBrokerAdapter implements MessageBrokerAdapter {
                 //     Event event = deserializeEvent(record.value());
                 //     localEventBus.publish(event);
                 // }
-                
+
                 // For this example, we'll just sleep to simulate polling
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -183,12 +183,12 @@ public class KafkaMessageBrokerAdapter implements MessageBrokerAdapter {
                 break;
             } catch (Exception e) {
                 logger.error("Error consuming events from Kafka", e);
-                
+
                 // In a real implementation, you might want to implement a retry mechanism
                 // or reconnect logic here
             }
         }
-        
+
         logger.info("Stopped consuming events from Kafka topic: {}", topic);
     }
 

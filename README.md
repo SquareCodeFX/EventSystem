@@ -227,6 +227,75 @@ public class MyEvent extends AbstractEvent {
 }
 ```
 
+## Logging
+
+The Event System uses a flexible logging approach that works with or without SLF4J being available on the classpath:
+
+- If SLF4J is available, it will use SLF4J for logging
+- If SLF4J is not available, it will use a no-op logger implementation that does nothing
+
+### Configuration
+
+To enable logging, add SLF4J and a compatible logging implementation (like Logback) to your classpath:
+
+```gradle
+// In your build.gradle or build.gradle.kts
+implementation("org.slf4j:slf4j-api:2.0.9")
+implementation("ch.qos.logback:logback-classic:1.4.11")
+```
+
+Configure Logback by adding a `logback.xml` file to your classpath (typically in `src/main/resources`):
+
+```xml
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set the default log level -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- Configure specific package log levels -->
+    <logger name="org.example.eventsystem" level="DEBUG" />
+</configuration>
+```
+
+### Using Logging in Custom Components
+
+To use logging in your custom components:
+
+```java
+import org.example.eventsystem.util.LoggerFactory;
+import org.example.eventsystem.util.LoggerFactory.Logger;
+
+public class MyCustomComponent {
+    // Create a logger instance for your class
+    private static final Logger logger = LoggerFactory.getLogger(MyCustomComponent.class);
+
+    public void doSomething() {
+        // Log at different levels
+        logger.trace("Detailed trace information");
+        logger.debug("Debugging information");
+        logger.info("Informational message");
+        logger.warn("Warning message");
+        logger.error("Error message");
+
+        // Log with parameters
+        logger.info("Processing event: {}", eventName);
+
+        // Check if a log level is enabled before expensive operations
+        if (logger.isDebugEnabled()) {
+            String expensiveToGenerate = generateDetailedDebugInfo();
+            logger.debug("Detailed debug info: {}", expensiveToGenerate);
+        }
+    }
+}
+```
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
